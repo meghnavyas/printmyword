@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Login | Print My Word</title>
+    <link href='https://fonts.googleapis.com/css?family=Kalam' rel='stylesheet'>
+    <link rel="stylesheet" type="text/css" href="styles/pmw_login.css">
+</head>
+
+<body>
+    <div class="pmw_header">
+        <h1>Print My Word</h1>
+    </div>
+
+    <div class="pmw_loginform">
+        <form method="POST" action="">
+            <p><input type="text" id="pmw_email" value="" placeholder="Email"></p>
+            <p><input type="password" id="pmw_pass" placeholder="Password"></p>
+            <p class="login_button"><input type="button" id="pmw_login_btn" value="LOGIN"></p>
+
+        </form>
+    </div>
+
+
+
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="/__/firebase/7.6.2/firebase-app.js"></script>
+
+    <!-- Add Firebase products that you want to use -->
+    <script src="/__/firebase/7.6.2/firebase-auth.js"></script>
+    <script src="/__/firebase/7.6.2/firebase-firestore.js"></script>
+
+
+
+    <script defer type="module" src="./scripts/init_firebase.js">
+    </script>
+
+    <script defer type="module" src="./scripts/verify.js">
+    </script>
+
+
+</body>
+
+</html>
