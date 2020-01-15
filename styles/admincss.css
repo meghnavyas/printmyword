@@ -1,0 +1,138 @@
+* {
+    margin: 0px;
+    padding: 0px;
+    box-sizing: border-box;
+}
+
+.pmw_header {
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 25px 10px 15px 10px;
+    min-height: 70px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+#pmw_title {
+    color: black;
+    font-family: "Bookman Old Style";
+    font-size: 24px;
+    margin: 0px 10px 0px 10px;
+    flex-grow: 1;
+    align-self: flex-start;
+    float: left;
+}
+
+#pmw_user {
+    padding: 5px;
+    text-align: center;
+    margin: 5px;
+    flex-grow: 5;
+    align-self: center;
+}
+
+header a {
+    color: white;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 16px;
+}
+
+header li {
+    margin: 10px;
+    padding: 0 10px 0 10px;
+    text-decoration: none;
+    display: inline;
+    align-self: flex-end;
+}
+
+header ul {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    align-self: flex-end;
+    float: right;
+}
+
+
+/*BODY*/
+
+body {
+    height: 100%;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: royalblue;
+}
+
+
+/*Table*/
+
+table {
+    width: 100%;
+    border: 1px solid black;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0px 40px 0px rgba(0, 0, 0, 0.15);
+    -moz-box-shadow: 0 0px 40px 0px rgba(0, 0, 0, 0.15);
+    -webkit-box-shadow: 0 0px 40px 0px rgba(0, 0, 0, 0.15);
+    -o-box-shadow: 0 0px 40px 0px rgba(0, 0, 0, 0.15);
+    -ms-box-shadow: 0 0px 40px 0px rgba(0, 0, 0, 0.15);
+}
+
+th {
+    height: 60px;
+}
+
+td {
+    height: 50px;
+    vertical-align: bottom;
+}
+
+th,
+td {
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+tr:nth-child(odd) {
+    background-color: lightgray;
+    color: black;
+}
+
+tr:nth-child(even) {
+    background-color: papayawhip;
+    color: black;
+}
+
+th {
+    background-color: royalblue;
+    color: white;
+}
+
+tr:hover {
+    background-color: cadetblue;
+}
+
+.table_header {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.table-container {
+    overflow-x: auto;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex-wrap: 100%;
+    padding: 33px 30px;
+    width: 100%;
+    min-height: 100vh;
+    background-color: slategray;
+}
