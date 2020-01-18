@@ -70,13 +70,13 @@ input[type=password]:focus {
     outline-offset: 0;
 }
 
-.pmw_login_button {
+#pmw_login_btn {
     padding: 0 18px;
     height: 40px;
     width: 150px;
     font-size: 17px;
-    color: white;
-    background: black;
+    color: black;
+    background: white;
     border: 1px;
     border-radius: 25px;
     outline: 0;
