@@ -36,10 +36,10 @@ function findOwner(id) {
 let fbstorage = adminportal.storage();
 let storageRef = fbstorage.ref();
 
-
+let db = adminportal.firestore();
 
 function loadAsset() {
-    let db = adminportal.firestore();
+
 
     db.collection("sub_items").orderBy('item_date', 'desc').get().then(
 
@@ -80,10 +80,11 @@ function loadAsset() {
 
 
 
+function viewSubmission(loc) {
 
-function viewSubmission() {
+    // let location = this.firstChild.data;
 
-    let location = this.firstChild.data;
+    let location = loc;
 
     let imagesRef = storageRef.child(location);
 
@@ -95,8 +96,7 @@ function viewSubmission() {
 
 }
 
-
-
+/*--Method to add records to the table--*/
 function addRecord(tableID, subItem) {
     // Get a reference to the table
     let tableRef = document.getElementById(tableID);
@@ -104,29 +104,115 @@ function addRecord(tableID, subItem) {
     // Insert a row at the end of the table
     let newRow = tableRef.insertRow(-1);
 
+    // TITLE
     let cellTitle = newRow.insertCell(0);
     let newText = document.createTextNode(subItem.item_title);
     cellTitle.appendChild(newText);
 
+    // AUTHOR NAME
     let cellAuthor = newRow.insertCell(1);
     let ownerDetail = new Owner("", "", "");
     ownerDetail = findOwner(subItem.item_ownerUid);
     newText = document.createTextNode(ownerDetail.email);
     cellAuthor.appendChild(newText);
 
+    // DATE OF SUBMISSION
     let cellSubDate = newRow.insertCell(2);
     let itemDate = subItem.item_date.toDate().toDateString();
     newText = document.createTextNode(itemDate);
     cellSubDate.appendChild(newText);
 
+    // SUBMISSION FILE
     let cellSubFile = newRow.insertCell(3);
-    newText = document.createTextNode(subItem.item_loc);
+    newText = document.createTextNode("View");
     cellSubFile.appendChild(newText);
-    cellSubFile.addEventListener('click', viewSubmission, true);
+    cellSubFile.onclick = function () { viewSubmission(subItem.item_loc); }
+    //cellSubFile.addEventListener('click', viewSubmission(subItem.item_loc), true);
+
+
+    // STATUS cell
+    let cellStatusCheckbox = newRow.insertCell(4);
+    let button = document.createElement("input");
+    button.type = "checkbox";
+    button.classList.add("switch");
+    cellStatusCheckbox.appendChild(button);
+
+    // Empty cell to display STATUS in text
+    let cellStatus = newRow.insertCell(5);
+    newText = document.createTextNode(subItem.item_status);
+    if (newText.data == "BOOKED")
+        button.checked = true;
+    cellStatus.appendChild(newText);
+
+    button.onclick = function () { changeStatus(newText, subItem.item_loc); }
 
 }
 
 
+/*-- Method to change status --*/
+function changeStatus(text, item) {
+
+    if (text.data == "NEW") {
+        // Replace the status from "NEW" to "BOOKED"
+        text.replaceData(0, 100, "BOOKED");
+
+        // Get the corresponding document in database
+        db.collection("sub_items").where("item_loc", "==", item).get().then((snapshot) => {
+
+            // Get the document's auto-generated id
+            const docRefId = snapshot.docs[0].id;
+            console.log("doc : " + docRefId);
+
+            // Create a reference to the obtained document
+            var SubRef = db.collection("sub_items").doc(docRefId);
+
+            // Update the status value
+            return SubRef.update({
+                item_status: "BOOKED"
+            })
+                .then(function () {
+                    console.log("Document successfully updated!");
+                })
+                .catch(function (error) {
+                    // The document probably doesn't exist.
+                    console.error("Error updating document: ", error);
+                });
+
+        });
+    }
+
+
+    else if (text.data == "BOOKED") {
+        text.replaceData(0, 10, "NEW");
+
+        // Get the corresponding document in database
+        db.collection("sub_items").where("item_loc", "==", item).get().then((snapshot) => {
+
+            // Get the document's auto-generated id
+            const docRefId = snapshot.docs[0].id;
+            console.log("doc : " + docRefId);
+
+            // Create a reference to the obtained document
+            var SubRef = db.collection("sub_items").doc(docRefId);
+
+            // Update the status value
+            return SubRef.update({
+                item_status: "NEW"
+            })
+                .then(function () {
+                    console.log("Document successfully updated!");
+                })
+                .catch(function (error) {
+                    // The document probably doesn't exist.
+                    console.error("Error updating document: ", error);
+                });
+
+        });
+
+    }
+
+
+}
 
 
 function signOut() {
@@ -135,7 +221,7 @@ function signOut() {
 
 }
 
-adminportal.auth().onAuthStateChanged(function(user) {
+adminportal.auth().onAuthStateChanged(function (user) {
     // [END_EXCLUDE]
     if (user) {
         loadAsset();
@@ -144,17 +230,3 @@ adminportal.auth().onAuthStateChanged(function(user) {
     }
 });
 
-
-
-/*
-var firebaseConfig = {
-    apiKey: "AIzaSyCXFAAlH6cSyNK4PuFkvMw186PfeJPfzaI",
-    authDomain: "sip-app-f21cd.firebaseapp.com",
-    databaseURL: "https://sip-app-f21cd.firebaseio.com",
-    projectId: "sip-app-f21cd",
-    storageBucket: "sip-app-f21cd.appspot.com",
-    messagingSenderId: "327923839614",
-    appId: "1:327923839614:web:a499c6fa10a67b3b065e2f",
-    measurementId: "G-28BM793EPZ"
-};
-*/
