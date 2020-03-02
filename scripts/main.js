@@ -1,5 +1,6 @@
 import { adminportal } from './init_firebase.js';
 
+
 var arrayOfOwners = [];
 document.getElementById('pmw_log_out').addEventListener('click', signOut, false);
 
@@ -36,12 +37,44 @@ function findOwner(id) {
 let fbstorage = adminportal.storage();
 let storageRef = fbstorage.ref();
 
+let db = adminportal.firestore();
+
+// Field to hold the query limit
+var queryLimit = 5;
+
+// Field to hold the query to retrieve the first N documents
+var first = db.collection("sub_items").orderBy('item_date', 'desc').limit(queryLimit);
+
+/*--------------------------------------------------------------------------------------
+                            Method to paginate the queries
+---------------------------------------------------------------------------------------*/
+function paginateQuery(query) {
+
+    query.get().then(function (documentSnapshots) {
+
+        // Get the last visible document
+        var lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
+        console.log("last", lastVisible);
+
+        // Construct a new query starting at this document,
+        // get the next N queries
+        var next = db.collection('sub_items')
+            .orderBy('item_date', 'desc')
+            .startAfter(lastVisible)
+            .limit(queryLimit);
+    });
+
+}
 
 
-function loadAsset() {
-    let db = adminportal.firestore();
+/*--------------------------------------------------------------------------------------
+        Method to read data from Cloud Firestore documents and display in table
+---------------------------------------------------------------------------------------*/
+function readDocuments(query) {
 
-    db.collection("sub_items").orderBy('item_date', 'desc').get().then(
+    // var first = db.collection("sub_items").orderBy('item_date', 'desc').limit(5);
+
+    query.get().then(
 
         (querySnapshot) => {
             querySnapshot.forEach((doc) => {
@@ -76,14 +109,18 @@ function loadAsset() {
 
             })
         });
+
+
 }
 
 
+/*--------------------------------------------------------------------------------------
+            View Submission File from Firebase Storage
+---------------------------------------------------------------------------------------*/
+function viewSubmission(loc) {
 
-
-function viewSubmission() {
-
-    let location = this.firstChild.data;
+    // Field to hold the location of the file in Cloud Storage
+    let location = loc;
 
     let imagesRef = storageRef.child(location);
 
@@ -96,7 +133,9 @@ function viewSubmission() {
 }
 
 
-
+/*--------------------------------------------------------------------------------------
+                Method to add a new record to table for each submission
+---------------------------------------------------------------------------------------*/
 function addRecord(tableID, subItem) {
     // Get a reference to the table
     let tableRef = document.getElementById(tableID);
@@ -104,57 +143,149 @@ function addRecord(tableID, subItem) {
     // Insert a row at the end of the table
     let newRow = tableRef.insertRow(-1);
 
+    // TITLE
     let cellTitle = newRow.insertCell(0);
     let newText = document.createTextNode(subItem.item_title);
     cellTitle.appendChild(newText);
 
-    let cellAuthor = newRow.insertCell(1);
+    // Finding user details
     let ownerDetail = new Owner("", "", "");
     ownerDetail = findOwner(subItem.item_ownerUid);
-    newText = document.createTextNode(ownerDetail.email);
+
+    // AUTHOR Name
+    let cellAuthor = newRow.insertCell(1);
+    newText = document.createTextNode(ownerDetail.name);
     cellAuthor.appendChild(newText);
 
-    let cellSubDate = newRow.insertCell(2);
+    // AUTHOR EMAIL
+    let cellEmail = newRow.insertCell(2);
+    newText = document.createTextNode(ownerDetail.email);
+    cellEmail.appendChild(newText);
+
+    // DATE OF SUBMISSION
+    let cellSubDate = newRow.insertCell(3);
     let itemDate = subItem.item_date.toDate().toDateString();
     newText = document.createTextNode(itemDate);
     cellSubDate.appendChild(newText);
 
-    let cellSubFile = newRow.insertCell(3);
-    newText = document.createTextNode(subItem.item_loc);
+    // SUBMISSION FILE
+    let cellSubFile = newRow.insertCell(4);
+    newText = document.createTextNode("View");
     cellSubFile.appendChild(newText);
-    cellSubFile.addEventListener('click', viewSubmission, true);
+    cellSubFile.onclick = function () { viewSubmission(subItem.item_loc); }
+    //cellSubFile.addEventListener('click', viewSubmission(subItem.item_loc), true);
+
+
+    // STATUS cell
+    let cellStatusCheckbox = newRow.insertCell(5);
+    let button = document.createElement("input");
+    button.type = "checkbox";
+    button.classList.add("switch");
+    cellStatusCheckbox.appendChild(button);
+
+    // Empty cell to display STATUS in text
+    let cellStatus = newRow.insertCell(6);
+    newText = document.createTextNode(subItem.item_status);
+    if (newText.data == "BOOKED")
+        button.checked = true;
+    cellStatus.appendChild(newText);
+
+    button.onclick = function () { changeStatus(newText, subItem.item_loc); }
 
 }
 
 
+/*--------------------------------------------------------------------------------------
+                    Method to change status of a Submission record
+---------------------------------------------------------------------------------------*/
+function changeStatus(text, item) {
+
+    if (text.data == "NEW") {
+        // Replace the status from "NEW" to "BOOKED"
+        text.replaceData(0, 100, "BOOKED");
+
+        // Get the corresponding document in database
+        db.collection("sub_items").where("item_loc", "==", item).get().then((snapshot) => {
+
+            // Get the document's auto-generated id
+            const docRefId = snapshot.docs[0].id;
+            console.log("doc : " + docRefId);
+
+            // Create a reference to the obtained document
+            var SubRef = db.collection("sub_items").doc(docRefId);
+
+            // Update the status value
+            return SubRef.update({
+                item_status: "BOOKED"
+            })
+                .then(function () {
+                    console.log("Document successfully updated!");
+                })
+                .catch(function (error) {
+                    // The document probably doesn't exist.
+                    console.error("Error updating document: ", error);
+                });
+
+        });
+    }
 
 
+    else if (text.data == "BOOKED") {
+        text.replaceData(0, 10, "NEW");
+
+        // Get the corresponding document in database
+        db.collection("sub_items").where("item_loc", "==", item).get().then((snapshot) => {
+
+            // Get the document's auto-generated id
+            const docRefId = snapshot.docs[0].id;
+            console.log("doc : " + docRefId);
+
+            // Create a reference to the obtained document
+            var SubRef = db.collection("sub_items").doc(docRefId);
+
+            // Update the status value
+            return SubRef.update({
+                item_status: "NEW"
+            })
+                .then(function () {
+                    console.log("Document successfully updated!");
+                })
+                .catch(function (error) {
+                    // The document probably doesn't exist.
+                    console.error("Error updating document: ", error);
+                });
+
+        });
+
+    }
+
+
+}
+
+
+/*--------------------------------------------------------------------------------------
+                        Implementing pagination on the table
+---------------------------------------------------------------------------------------*/
+function loadNext() {
+
+}
+
+
+/*--------------------------------------------------------------------------------------
+                            Method to implement Sign Out
+---------------------------------------------------------------------------------------*/
 function signOut() {
     adminportal.auth().signOut();
     console.log('signed out');
 
 }
 
-adminportal.auth().onAuthStateChanged(function(user) {
+adminportal.auth().onAuthStateChanged(function (user) {
     // [END_EXCLUDE]
     if (user) {
-        loadAsset();
+        readDocuments(first);
     } else {
         window.location = "./pmw_login.html";
     }
 });
 
-
-
-/*
-var firebaseConfig = {
-    apiKey: "AIzaSyCXFAAlH6cSyNK4PuFkvMw186PfeJPfzaI",
-    authDomain: "sip-app-f21cd.firebaseapp.com",
-    databaseURL: "https://sip-app-f21cd.firebaseio.com",
-    projectId: "sip-app-f21cd",
-    storageBucket: "sip-app-f21cd.appspot.com",
-    messagingSenderId: "327923839614",
-    appId: "1:327923839614:web:a499c6fa10a67b3b065e2f",
-    measurementId: "G-28BM793EPZ"
-};
-*/
