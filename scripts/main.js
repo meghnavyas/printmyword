@@ -2,6 +2,10 @@ import { adminportal } from './init_firebase.js';
 
 
 var arrayOfOwners = [];
+
+let lastVisible = null;
+
+
 document.getElementById('pmw_log_out').addEventListener('click', signOut, false);
 
 //OWNER CLASS
@@ -40,46 +44,42 @@ let storageRef = fbstorage.ref();
 let db = adminportal.firestore();
 
 // Field to hold the query limit
-var queryLimit = 5;
+var queryLimit = 2;
 
-// Field to hold the query to retrieve the first N documents
-var first = db.collection("sub_items").orderBy('item_date', 'desc').limit(queryLimit);
 
-/*--------------------------------------------------------------------------------------
-                            Method to paginate the queries
----------------------------------------------------------------------------------------*/
-function paginateQuery(query) {
-
-    query.get().then(function (documentSnapshots) {
-
-        // Get the last visible document
-        var lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
-        console.log("last", lastVisible);
-
-        // Construct a new query starting at this document,
-        // get the next N queries
-        var next = db.collection('sub_items')
-            .orderBy('item_date', 'desc')
-            .startAfter(lastVisible)
-            .limit(queryLimit);
-    });
-
-}
+// Load more button
+let loadButton = document.getElementById('load-more');
+loadButton.onclick = function () { loadAsset(); };
 
 
 /*--------------------------------------------------------------------------------------
         Method to read data from Cloud Firestore documents and display in table
 ---------------------------------------------------------------------------------------*/
-function readDocuments(query) {
+function loadAsset() {
 
     // var first = db.collection("sub_items").orderBy('item_date', 'desc').limit(5);
+    let query = db.collection("sub_items").orderBy('item_date', 'desc').limit(queryLimit);
+
+    if (lastVisible != null) {
+        query = db.collection('sub_items')
+            .orderBy('item_date', 'desc')
+            .startAfter(lastVisible)
+            .limit(queryLimit);
+
+    }
 
     query.get().then(
 
         (querySnapshot) => {
-            querySnapshot.forEach((doc) => {
-                var item = doc.data();
 
+
+            // Get the last visible document
+            lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+            console.log("last", lastVisible);
+
+            querySnapshot.forEach((doc) => {
+
+                var item = doc.data();
 
                 let flag = false;
 
@@ -283,7 +283,7 @@ function signOut() {
 adminportal.auth().onAuthStateChanged(function (user) {
     // [END_EXCLUDE]
     if (user) {
-        readDocuments(first);
+        loadAsset();
     } else {
         window.location = "./pmw_login.html";
     }
