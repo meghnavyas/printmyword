@@ -17,7 +17,7 @@
 
 #pmw_title {
     color: black;
-    font-family: "Bookman Old Style";
+    font-family: 'Kalam';
     font-size: 24px;
     margin: 0px 10px 0px 10px;
     flex-grow: 1;
@@ -63,7 +63,7 @@ body {
     height: 100%;
     color: white;
     font-family: Arial, Helvetica, sans-serif;
-    background-color: royalblue;
+    background-color:#2f4b9b;
 }
 
 
@@ -109,12 +109,13 @@ tr:nth-child(even) {
 }
 
 th {
-    background-color: royalblue;
+    background-color: #2f4b9b;
     color: white;
+    font-size: 17px;
 }
 
 tr:hover {
-    background-color: cadetblue;
+    background-color: #3f60b9;
 }
 
 .table_header {
@@ -135,4 +136,34 @@ tr:hover {
     width: 100%;
     min-height: 100vh;
     background-color: slategray;
+}
+
+h1{
+    color: #ffcc00;
+}
+
+.switch {
+  display: inline-block;
+  width: 35px;
+  height: 18px;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.load-more-container {
+    text-align: center;
+    background-color: #ffffff;
+    color: #2f4b9b;
+    height: 40px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.load-more-container a{
+    font-size: 20px;
+    font-style: oblique;
 }
